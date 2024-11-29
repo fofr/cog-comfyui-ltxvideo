@@ -2,5 +2,13 @@
   {
     "repo": "https://github.com/cubiq/ComfyUI_essentials",
     "commit": "5a4e5cd"
+  },
+  {
+    "repo": "https://github.com/fofr/comfyui-fofr-toolkit",
+    "commit": "eb5fec4"
+  },
+  {
+    "repo": "https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite",
+    "commit": "fb56b2d"
   }
 ]

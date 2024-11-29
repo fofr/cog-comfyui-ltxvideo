@@ -263,16 +263,7 @@ class ComfyUI:
         else:
             wf = workflow
 
-        # There are two types of ComfyUI JSON
-        # We need the API version
-        if any(key in wf.keys() for key in ["last_node_id", "last_link_id", "version"]):
-            raise ValueError(
-                "You need to use the API JSON version of a ComfyUI workflow. To do this go to your ComfyUI settings and turn on 'Enable Dev mode Options'. Then you can save your ComfyUI workflow via the 'Save (API Format)' button."
-            )
-
-        self.handle_known_unsupported_nodes(wf)
         self.handle_inputs(wf)
-        self.handle_weights(wf)
         return wf
 
     def reset_execution_cache(self):

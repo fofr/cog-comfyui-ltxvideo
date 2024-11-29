@@ -1,6 +1,3 @@
-# An example of how to convert a given API workflow into its own Replicate model
-# Replace predict.py with this file when building your own workflow
-
 import os
 import mimetypes
 import json
@@ -8,15 +5,12 @@ import shutil
 from typing import List
 from cog import BasePredictor, Input, Path
 from comfyui import ComfyUI
-from cog_model_helpers import optimise_images
 from cog_model_helpers import seed as seed_helper
 
 OUTPUT_DIR = "/tmp/outputs"
 INPUT_DIR = "/tmp/inputs"
 COMFYUI_TEMP_OUTPUT_DIR = "ComfyUI/temp"
 ALL_DIRECTORIES = [OUTPUT_DIR, INPUT_DIR, COMFYUI_TEMP_OUTPUT_DIR]
-
-mimetypes.add_type("image/webp", ".webp")
 
 # Save your example JSON to the same directory as predict.py
 api_json_file = "workflow_api.json"
@@ -25,6 +19,7 @@ api_json_file = "workflow_api.json"
 os.environ["HF_DATASETS_OFFLINE"] = "1"
 os.environ["TRANSFORMERS_OFFLINE"] = "1"
 os.environ["HF_HUB_DISABLE_TELEMETRY"] = "1"
+
 
 class Predictor(BasePredictor):
     def setup(self):
@@ -52,39 +47,76 @@ class Predictor(BasePredictor):
 
     # Update nodes in the JSON workflow to modify your workflow based on the given inputs
     def update_workflow(self, workflow, **kwargs):
-        # Below is an example showing how to get the node you need and update the inputs
+        # Update positive prompt
+        positive_prompt = workflow["6"]["inputs"]
+        positive_prompt["text"] = kwargs["prompt"]
 
-        # positive_prompt = workflow["6"]["inputs"]
-        # positive_prompt["text"] = kwargs["prompt"]
+        # Update negative prompt
+        negative_prompt = workflow["7"]["inputs"]
+        negative_prompt["text"] = kwargs["negative_prompt"]
 
-        # negative_prompt = workflow["7"]["inputs"]
-        # negative_prompt["text"] = f"nsfw, {kwargs['negative_prompt']}"
+        # Update target size
+        target_size = workflow["81"]["inputs"]
+        target_size["target_size"] = kwargs["target_size"]
 
-        # sampler = workflow["3"]["inputs"]
-        # sampler["seed"] = kwargs["seed"]
-        pass
+        # Update cfg scale
+        sampler = workflow["72"]["inputs"]
+        sampler["cfg"] = kwargs["cfg_scale"]
+        sampler["noise_seed"] = kwargs["seed"]
+
+        # Update steps
+        scheduler = workflow["71"]["inputs"]
+        scheduler["steps"] = kwargs["steps"]
+
+        # Update length
+        img_to_video = workflow["77"]["inputs"]
+        img_to_video["length"] = kwargs["length"]
+
+        # Update input image
+        if kwargs["image_filename"]:
+            load_image = workflow["78"]["inputs"]
+            load_image["image"] = kwargs["image_filename"]
 
     def predict(
         self,
         prompt: str = Input(
-            default="",
+            description="Text prompt for the video. This model needs long descriptive prompts, if the prompt is too short the quality won't be good.",
+            default="best quality, 4k, HDR, a tracking shot of a beautiful scene",
         ),
         negative_prompt: str = Input(
-            description="Things you do not want to see in your image",
-            default="",
+            description="Things you do not want to see in your video",
+            default="low quality, worst quality, deformed, distorted",
         ),
         image: Path = Input(
-            description="An input image",
+            description="Input image to animate",
             default=None,
         ),
-        output_format: str = optimise_images.predict_output_format(),
-        output_quality: int = optimise_images.predict_output_quality(),
+        target_size: int = Input(
+            description="Target size for the output video",
+            default=640,
+            choices=[512, 576, 640, 704, 768, 832, 896, 960, 1024],
+        ),
+        cfg: float = Input(
+            description="How strongly the video follows the prompt",
+            default=3.0,
+            ge=1.0,
+            le=20.0,
+        ),
+        steps: int = Input(
+            description="Number of steps",
+            default=30,
+            ge=1,
+            le=50,
+        ),
+        length: int = Input(
+            description="Length of the output video in frames",
+            default=97,
+            choices=[97, 129, 161, 193, 225, 257],
+        ),
         seed: int = seed_helper.predict_seed(),
     ) -> List[Path]:
         """Run a single prediction on the model"""
         self.comfyUI.cleanup(ALL_DIRECTORIES)
-
-        # Make sure to set the seeds in your workflow
         seed = seed_helper.generate(seed)
 
         image_filename = None
@@ -100,6 +132,10 @@ class Predictor(BasePredictor):
             prompt=prompt,
             negative_prompt=negative_prompt,
             image_filename=image_filename,
+            target_size=target_size,
+            cfg_scale=cfg,
+            steps=steps,
+            length=length,
             seed=seed,
         )
 
@@ -107,6 +143,4 @@ class Predictor(BasePredictor):
         self.comfyUI.connect()
         self.comfyUI.run_workflow(wf)
 
-        return optimise_images.optimise_image_files(
-            output_format, output_quality, self.comfyUI.get_files(OUTPUT_DIR)
-        )
+        return self.comfyUI.get_files(OUTPUT_DIR, file_extensions=["mp4"])
