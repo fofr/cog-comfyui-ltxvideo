@@ -46,6 +46,38 @@ class Predictor(BasePredictor):
 
     # Update nodes in the JSON workflow to modify your workflow based on the given inputs
     def update_workflow(self, workflow, **kwargs):
+
+        if not kwargs["image_filename"]:
+            del workflow["77"]
+            del workflow["78"]
+            del workflow["81"]
+            del workflow["82"]
+            workflow["72"]["inputs"]["latent_image"] = ["84", 0]
+            workflow["71"]["inputs"]["latent"] = ["84", 0]
+            workflow["69"]["inputs"]["positive"] = ["6", 0]
+            workflow["69"]["inputs"]["negative"] = ["7", 0]
+
+            aspect_ratio_size = workflow["85"]["inputs"]
+            aspect_ratio_size["target_size"] = kwargs["target_size"]
+            aspect_ratio_size["aspect_ratio"] = kwargs["aspect_ratio"]
+
+            length = workflow["84"]["inputs"]
+            length["length"] = kwargs["length"]
+        else:
+            del workflow["84"]
+            del workflow["85"]
+
+            target_size = workflow["81"]["inputs"]
+            target_size["target_size"] = kwargs["target_size"]
+
+            img_to_video = workflow["77"]["inputs"]
+            img_to_video["length"] = kwargs["length"]
+
+            # Update input image
+            if kwargs["image_filename"]:
+                load_image = workflow["78"]["inputs"]
+                load_image["image"] = kwargs["image_filename"]
+
         # Update positive prompt
         positive_prompt = workflow["6"]["inputs"]
         positive_prompt["text"] = kwargs["prompt"]
@@ -53,14 +85,6 @@ class Predictor(BasePredictor):
         # Update negative prompt
         negative_prompt = workflow["7"]["inputs"]
         negative_prompt["text"] = kwargs["negative_prompt"]
-
-        # Update target size for both nodes
-        target_size = workflow["81"]["inputs"]
-        target_size["target_size"] = kwargs["target_size"]
-
-        aspect_ratio_size = workflow["85"]["inputs"]
-        aspect_ratio_size["target_size"] = kwargs["target_size"]
-        aspect_ratio_size["aspect_ratio"] = kwargs["aspect_ratio"]
 
         # Update cfg scale
         sampler = workflow["72"]["inputs"]
@@ -70,15 +94,6 @@ class Predictor(BasePredictor):
         # Update steps
         scheduler = workflow["71"]["inputs"]
         scheduler["steps"] = kwargs["steps"]
-
-        # Update length
-        img_to_video = workflow["77"]["inputs"]
-        img_to_video["length"] = kwargs["length"]
-
-        # Update input image
-        if kwargs["image_filename"]:
-            load_image = workflow["78"]["inputs"]
-            load_image["image"] = kwargs["image_filename"]
 
     def predict(
         self,
