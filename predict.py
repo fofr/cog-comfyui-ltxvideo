@@ -106,7 +106,7 @@ class Predictor(BasePredictor):
             default="low quality, worst quality, deformed, distorted",
         ),
         image: Path = Input(
-            description="Input image to animate",
+            description="Optional input image to use as the starting frame",
             default=None,
         ),
         target_size: int = Input(
@@ -115,7 +115,7 @@ class Predictor(BasePredictor):
             choices=[512, 576, 640, 704, 768, 832, 896, 960, 1024],
         ),
         aspect_ratio: str = Input(
-            description="Aspect ratio of the output video",
+            description="Aspect ratio of the output video. Ignored if an image is provided.",
             default="3:2",
             choices=[
                 "1:1",
