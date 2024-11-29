@@ -240,5 +240,34 @@
     "_meta": {
       "title": "🔧 Image Resize"
     }
+  },
+  "84": {
+    "inputs": {
+      "width": [
+        "85",
+        0
+      ],
+      "height": [
+        "85",
+        1
+      ],
+      "length": 97,
+      "batch_size": 1
+    },
+    "class_type": "EmptyLTXVLatentVideo",
+    "_meta": {
+      "title": "EmptyLTXVLatentVideo"
+    }
+  },
+  "85": {
+    "inputs": {
+      "aspect_ratio": "3:2",
+      "target_size": 640,
+      "multiple_of": 32
+    },
+    "class_type": "Width and height from aspect ratio 🪴",
+    "_meta": {
+      "title": "Width and height from aspect ratio 🪴"
+    }
   }
 }

@@ -1,5 +1,4 @@
 import os
-import mimetypes
 import json
 import shutil
 from typing import List
@@ -55,9 +54,13 @@ class Predictor(BasePredictor):
         negative_prompt = workflow["7"]["inputs"]
         negative_prompt["text"] = kwargs["negative_prompt"]
 
-        # Update target size
+        # Update target size for both nodes
         target_size = workflow["81"]["inputs"]
         target_size["target_size"] = kwargs["target_size"]
+
+        aspect_ratio_size = workflow["85"]["inputs"]
+        aspect_ratio_size["target_size"] = kwargs["target_size"]
+        aspect_ratio_size["aspect_ratio"] = kwargs["aspect_ratio"]
 
         # Update cfg scale
         sampler = workflow["72"]["inputs"]
@@ -96,6 +99,25 @@ class Predictor(BasePredictor):
             default=640,
             choices=[512, 576, 640, 704, 768, 832, 896, 960, 1024],
         ),
+        aspect_ratio: str = Input(
+            description="Aspect ratio of the output video",
+            default="3:2",
+            choices=[
+                "1:1",
+                "1:2",
+                "2:1",
+                "2:3",
+                "3:2",
+                "3:4",
+                "4:3",
+                "4:5",
+                "5:4",
+                "9:16",
+                "16:9",
+                "9:21",
+                "21:9",
+            ],
+        ),
         cfg: float = Input(
             description="How strongly the video follows the prompt",
             default=3.0,
@@ -133,6 +155,7 @@ class Predictor(BasePredictor):
             negative_prompt=negative_prompt,
             image_filename=image_filename,
             target_size=target_size,
+            aspect_ratio=aspect_ratio,
             cfg_scale=cfg,
             steps=steps,
             length=length,
