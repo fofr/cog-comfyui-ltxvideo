@@ -76,6 +76,7 @@ class Predictor(BasePredictor):
 
             img_to_video = workflow["77"]["inputs"]
             img_to_video["length"] = kwargs["length"]
+            img_to_video["image_noise_scale"] = kwargs["image_noise_scale"]
 
             # Update input image
             if kwargs["image_filename"]:
@@ -112,6 +113,12 @@ class Predictor(BasePredictor):
         image: Path = Input(
             description="Optional input image to use as the starting frame",
             default=None,
+        ),
+        image_noise_scale: float = Input(
+            description="Lower numbers stick more closely to the input image",
+            default=0.15,
+            ge=0.0,
+            le=1.0,
         ),
         target_size: int = Input(
             description="Target size for the output video",
@@ -178,6 +185,7 @@ class Predictor(BasePredictor):
             prompt=prompt,
             negative_prompt=negative_prompt,
             image_filename=image_filename,
+            image_noise_scale=image_noise_scale,
             target_size=target_size,
             aspect_ratio=aspect_ratio,
             cfg_scale=cfg,

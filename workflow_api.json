@@ -150,6 +150,7 @@
       ],
       "length": 97,
       "batch_size": 1,
+      "image_noise_scale": 0.15,
       "positive": [
         "6",
         0
