@@ -30,7 +30,9 @@ class Predictor(BasePredictor):
             workflow = json.loads(file.read())
         self.comfyUI.handle_weights(
             workflow,
-            weights_to_download=[],
+            weights_to_download=[
+                "ltx-video-2b-v0.9.1.safetensors",
+            ],
         )
 
     def filename_with_extension(self, input_file, prefix):
@@ -46,6 +48,8 @@ class Predictor(BasePredictor):
 
     # Update nodes in the JSON workflow to modify your workflow based on the given inputs
     def update_workflow(self, workflow, **kwargs):
+        model_loader = workflow["44"]["inputs"]
+        model_loader["ckpt_name"] = f"ltx-video-2b-v{kwargs['model']}.safetensors"
 
         if not kwargs["image_filename"]:
             del workflow["77"]
@@ -150,6 +154,11 @@ class Predictor(BasePredictor):
             default=97,
             choices=[97, 129, 161, 193, 225, 257],
         ),
+        model: str = Input(
+            description="Model version to use",
+            default="0.9.1",
+            choices=["0.9.1", "0.9"],
+        ),
         seed: int = seed_helper.predict_seed(),
     ) -> List[Path]:
         """Run a single prediction on the model"""
@@ -174,6 +183,7 @@ class Predictor(BasePredictor):
             cfg_scale=cfg,
             steps=steps,
             length=length,
+            model=model,
             seed=seed,
         )
 
