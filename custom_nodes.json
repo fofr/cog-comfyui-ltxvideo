@@ -10,5 +10,9 @@
   {
     "repo": "https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite",
     "commit": "fb56b2d"
+  },
+  {
+    "repo": "https://github.com/Lightricks/ComfyUI-LTXVideo",
+    "commit": "8cbf26c"
   }
 ]

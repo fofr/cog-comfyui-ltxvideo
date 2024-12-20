@@ -34,6 +34,10 @@ build:
     - imageio-ffmpeg
     - opencv-python-headless
 
+    # ComfyUI-LTXVideo
+    - ltx-video@git+https://github.com/Lightricks/LTX-Video@ltx-video-0.9.1
+    - av>=10.0.0
+
   run:
     - curl -o /usr/local/bin/pget -L "https://github.com/replicate/pget/releases/download/v0.9.1/pget_linux_x86_64" && chmod +x /usr/local/bin/pget
 predict: "predict.py:Predictor"
