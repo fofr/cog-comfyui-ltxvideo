@@ -163,7 +163,7 @@ class Predictor(BasePredictor):
         ),
         model: str = Input(
             description="Model version to use",
-            default="0.9",
+            default="0.9.1",
             choices=["0.9.1", "0.9"],
         ),
         seed: int = seed_helper.predict_seed(),
